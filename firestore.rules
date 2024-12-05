@@ -1,0 +1,32 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Базовые функции проверки
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    // Счетчики документов
+    match /documentCounters/{counterId} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated();
+    }
+
+    // Документы склада
+    match /warehouseDocuments/{docId} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated();
+    }
+
+    // Пользователи
+    match /users/{userId} {
+      allow create: if true;
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // Остальные коллекции
+    match /{document=**} {
+      allow read, write: if isAuthenticated();
+    }
+  }
+}
